@@ -9,12 +9,14 @@ public class Cancion {
   private Date fecha_estreno;
   private int duracion;
   private ArrayList<Artista> artistas_colaboradores;
-public Cancion(String codigo, String titulo, Date fecha_estreno, int duracion) {
+  private String album;
+public Cancion(String codigo, String titulo, Date fecha_estreno, int duracion, String album) {
 	super();
 	this.codigo = codigo;
 	this.titulo = titulo;
 	this.fecha_estreno = fecha_estreno;
 	this.duracion = duracion;
+	this.album = album;
 }
 public String getCodigo() {
 	return codigo;
@@ -45,6 +47,9 @@ public ArrayList<Artista> getArtistas_colaboradores() {
 }
 public void setArtistas_colaboradores(ArrayList<Artista> artistas_colaboradores) {
 	this.artistas_colaboradores = artistas_colaboradores;
+}
+public String getAlbum() {
+	return album;
 }
 
   

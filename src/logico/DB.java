@@ -27,26 +27,32 @@ public class DB {
 	   }
 	}
 	
+	private void setConnection() {
+		try {
+			conn = DriverManager
+			        .getConnection("jdbc:postgresql://" + host + ":5432/" + database,
+			        user, pass);
+			conn.setAutoCommit(false);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	private void connect() {
 		if (conn == null) {
-			try {
-				conn = DriverManager
-				        .getConnection("jdbc:postgresql://" + host + ":5432/" + database,
-				        user, pass);
-				conn.setAutoCommit(false);
-				setStatement();
-			    
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    
+			setConnection();
+			setStatement();
 		}
 
 	}
 	
 	private void setStatement() {
 		try {
+			if (conn == null) {
+				setConnection();
+			}
 			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -207,6 +213,110 @@ public class DB {
 				+ ",'Activo','"
 				+ username + "'");
 		System.out.println("Usuario agregado correctamente.");
+	}
+	
+	public String getAlbum(int idCancion) {
+		String album = null;
+		int idAlbum = -1;
+		
+		ResultSet rs = select("nombre from albumes as ALB, canciones as CA, albumes_canciones as AC where AC.album = ALB.codigo_album AND AC.cancion = CA.codigo_cancion"
+				+ " AND CA.codigo_cancion = "+idCancion+";");
+		
+		try {
+			if (rs.next()) {
+				album = rs.getString("nombre");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return album;
+	}
+	
+	public ArrayList<Playlist> getPlayLists(String username) {
+		ArrayList<Playlist> playlists = new ArrayList<>();
+		ResultSet PLRS = select("* from playlists as PL, usuarios as USR where PL.usuario = USR.codigo_usuario AND USR.nombre_usuario = '"+username+"';");
+		int idPlaylist = -1;
+		int idCancion = -1;
+		int idArtista = -1;
+		
+		try {
+			while (PLRS.next()) {
+				idPlaylist = PLRS.getInt("codigo_playlist");
+				Playlist aux = new Playlist(((Integer) idPlaylist).toString(), getDBUser(username), PLRS.getString("nombre"), PLRS.getDate("fecha_creacion"));
+				
+				ResultSet CCRS = select("* from canciones as CC, playlists_canciones as PLCC, playlists as PL where PL.codigo_playlist = "
+						+ idPlaylist + " AND " + "PLCC.playlist = PL.codigo_playlist AND PLCC.cancion = CC.codigo_cancion;"
+				);
+				
+				ArrayList<Cancion> canciones = new ArrayList<>();
+				
+				while(CCRS.next()) {
+					idCancion = CCRS.getInt("codigo_cancion");
+					Cancion aux2 = new Cancion( ((Integer) idCancion).toString(), CCRS.getString("titulo"), CCRS.getDate("fechaestreno"), CCRS.getInt("duracion"), getAlbum(idCancion));
+					
+					ResultSet colaboradores = select("* from artistas as ART, colaborador_cancion as CC where CC.artista = ART.codigo_artista AND CC.cancion = " +
+					idCancion + ";"
+							);
+					ArrayList<Artista> colabs = new ArrayList<>();
+					while(colaboradores.next()) {
+						idArtista = colaboradores.getInt("codigo_artista");
+						
+						String pnombre = null, papellido = null, snombre= null, sapellido= null,
+								pais= null, sexo= null, codigo_persona = null, genero = null, nombre_artistico = colaboradores.getString("nombre_artistico");
+						Date fecha_nac = null;
+						
+						ResultSet pRS = select("* from personas as P, artistas as ART where ART.codigo_artista = " + idArtista + " AND P.codigo_persona = ART.persona;");
+						int idPersona = -1;
+						
+						if (pRS.next()) {
+							pnombre = pRS.getString("pnombre");
+							papellido = pRS.getString("papellido");
+							snombre = pRS.getString("snombre");
+							sapellido = pRS.getString("sapellido");
+							sexo = pRS.getString("sexo");
+							codigo_persona = pRS.getString("codigo_persona");
+							idPersona = pRS.getInt("codigo_persona");
+							fecha_nac = pRS.getDate("fechanacim");
+							
+						}
+						
+						ResultSet paises = select("nombre from paises as PA, personas as P where P.pais_origen = PA.codigo_pais AND P.codigo_persona = " + idPersona + ";");
+						
+						if (paises.next()) {
+							pais = paises.getString("nombre");
+						}
+						
+						ResultSet generos = select("nombre from generos as GE, artistas as ART, artistas_generos as ARTGE where ARTGE.artista = ART.codigo_artista AND "
+								+ "ARTGE.genero = GE.codigo_genero AND ART.codigo_artista = " + idArtista + ";");
+						
+						if (generos.next()) {
+							genero = generos.getString("nombre");
+						}
+						
+						Artista aux3 = new Artista(pnombre, papellido,
+								snombre, sapellido,pais, sexo, fecha_nac,
+								codigo_persona, ((Integer)idArtista).toString(),
+								genero, nombre_artistico
+								);
+						colabs.add(aux3);
+					}
+					aux2.setArtistas_colaboradores(colabs);
+					canciones.add(aux2);
+				}
+				aux.setMiscanciones(canciones);
+				playlists.add(aux);
+			}
+			
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return playlists;
 	}
 
 }

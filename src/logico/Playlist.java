@@ -46,6 +46,11 @@ public ArrayList<Cancion> getMiscanciones() {
 public void setMiscanciones(ArrayList<Cancion> miscanciones) {
 	this.miscanciones = miscanciones;
 }
+
+@Override
+public String toString() {
+	return getNombre();
+}
   
 	
 

@@ -7,10 +7,12 @@ public class Artista extends Persona{
     private String nombre_artistico;
     private String genero;
 	public Artista(String pnombre, String papellido, String snombre, String sapellido, String mipais, String sexo,
-			Date fecha_nacim, String codigo, String codigo_artista) {
+			Date fecha_nacim, String codigo, String codigo_artista, String genero, String nombre_artistico) {
 		super(pnombre, papellido, snombre, sapellido, mipais, sexo, fecha_nacim, codigo);
 		// TODO Auto-generated constructor stub
 		this.codigo_artista = codigo_artista;
+		this.genero = genero;
+		this.nombre_artistico = nombre_artistico;
 	}
 	public String getCodigo_artista() {
 		return codigo_artista;
