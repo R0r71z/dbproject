@@ -11,10 +11,9 @@ public class Persona {
 	protected String sexo;
 	protected Date fecha_nacim;
 	protected String codigo;
-	protected String idioma_preferencia;
 	
 	public Persona(String pnombre, String papellido, String snombre, String sapellido, String mipais, String sexo,
-			Date fecha_nacim, String codigo, String idioma_preferencia) {
+			Date fecha_nacim, String codigo) {
 		// TODO Auto-generated constructor stub
 		super();
 		this.pnombre = pnombre;
@@ -25,7 +24,6 @@ public class Persona {
 		this.sexo = sexo;
 		this.codigo = codigo;
 		this.fecha_nacim = fecha_nacim;
-		this.idioma_preferencia = idioma_preferencia;
 		
 	}
 	public String getPnombre() {
@@ -52,9 +50,6 @@ public class Persona {
 	public String getCodigo() {
 		return codigo;
 	}
-	public String getIdioma_preferencia() {
-		return idioma_preferencia;
-	}
 	public void setPnombre(String pnombre) {
 		this.pnombre = pnombre;
 	}
@@ -79,10 +74,10 @@ public class Persona {
 	public void setCodigo(String codigo) {
 		this.codigo = codigo;
 	}
-	public void setIdioma_preferencia(String idioma_preferencia) {
-		this.idioma_preferencia = idioma_preferencia;
-	}
-
 	
+	@Override
+	public String toString() {
+		return getPnombre() + " " + getPapellido();
+	}
 
 }

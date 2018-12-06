@@ -2,18 +2,24 @@ package logico;
 
 import java.util.Date;
 
-public class Usuario extends Persona{
+public class Usuario extends Persona {
     private String codigo_usuario;
+    private String username;
     private String password;
     private Date fecha_registro;
     private String correo;
     private String estado;
     
 	public Usuario(String pnombre, String papellido, String snombre, String sapellido, String mipais, String sexo,
-			Date fecha_nacim, String codigo, String idioma_preferencia, String codigo_usuario) {
-		super(pnombre, papellido, snombre, sapellido, mipais, sexo, fecha_nacim, codigo, idioma_preferencia);
-		// TODO Auto-generated constructor stub
+			Date fecha_nacim, String codigo, String codigo_usuario, String username,
+			String password, Date fecha_registro, String correo, String estado) {
+		super(pnombre, papellido, snombre, sapellido, mipais, sexo, fecha_nacim, codigo);
 		this.codigo_usuario = codigo_usuario;
+		this.username = username;
+		this.password = password;
+		this.fecha_registro = fecha_registro;
+		this.correo = correo;
+		this.estado = estado;
 	}
 	
 	
@@ -46,6 +52,20 @@ public class Usuario extends Persona{
 	}
 	public void setEstado(String estado) {
 		this.estado = estado;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	@Override
+	public String toString() {
+		return getUsername()+ " " + getCorreo() + " " + super.toString();
 	}
 
 	

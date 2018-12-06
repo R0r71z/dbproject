@@ -21,6 +21,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import java.util.Date;
 import java.util.Calendar;
+import javax.swing.JPasswordField;
 
 public class RegistrarUsuario extends JDialog {
 
@@ -29,8 +30,8 @@ public class RegistrarUsuario extends JDialog {
 	private JTextField txtNombre;
 	private JTextField txtApellido;
 	private JTextField textField;
-	private JTextField textField_1;
 	private JTextField textField_2;
+	private JPasswordField passwordField;
 
 	/**
 	 * Launch the application.
@@ -139,11 +140,6 @@ public class RegistrarUsuario extends JDialog {
 		lblNewLabel_3.setBounds(197, 210, 83, 14);
 		panel.add(lblNewLabel_3);
 		
-		textField_1 = new JTextField();
-		textField_1.setBounds(271, 207, 170, 23);
-		panel.add(textField_1);
-		textField_1.setColumns(10);
-		
 		JLabel lblNewLabel_4 = new JLabel("Correo:");
 		lblNewLabel_4.setBounds(10, 255, 46, 14);
 		panel.add(lblNewLabel_4);
@@ -152,6 +148,10 @@ public class RegistrarUsuario extends JDialog {
 		textField_2.setBounds(66, 252, 375, 23);
 		panel.add(textField_2);
 		textField_2.setColumns(10);
+		
+		passwordField = new JPasswordField();
+		passwordField.setBounds(271, 210, 170, 20);
+		panel.add(passwordField);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
