@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class DB {
 	private Connection conn;
@@ -66,10 +67,22 @@ public class DB {
 		return rs;
 	}
 	
+	public void insert(String table, String columns, String values) {
+		connect();
+		try {
+			stmt.executeUpdate("INSERT INTO " + table +" ("+columns+") VALUES ("+values+");");
+			conn.commit();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		close();
+	}
+	
 	public void close() {
         try {
 			stmt.close();
-			conn.close();
+			conn = null;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -78,6 +91,7 @@ public class DB {
 	}
 	
 	public Usuario getDBUser(String username) {
+		connect();
 		Persona user = null;
 		ResultSet uRS = select("* from usuarios where nombre_usuario = '" + username + "';");
 		ResultSet pRS = select("* from personas as P, usuarios as U where U.nombre_usuario = '" + username + "' AND P.codigo_persona = U.persona;");
@@ -95,6 +109,8 @@ public class DB {
 				correo = uRS.getString("correo");
 				estado = uRS.getString("estado");
 				fecha_registro = uRS.getDate("fecharegistro");
+			} else {
+				return null;
 			}
 			
 			if (pRS.next()) {
@@ -105,6 +121,7 @@ public class DB {
 				sexo = pRS.getString("sexo");
 				codigo_persona = pRS.getString("codigo_persona");
 				idPersona = pRS.getInt("codigo_persona");
+				fecha_nac = pRS.getDate("fechanacim");
 				
 			}
 			ResultSet paises = select("nombre from paises as PA, personas as P where P.pais_origen = PA.codigo_pais AND P.codigo_persona = " + idPersona + ";");
@@ -134,7 +151,62 @@ public class DB {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		close();
 		return (Usuario) user;
+	}
+	
+	public ArrayList<Pais> getPaises() {
+		ArrayList<Pais> paises = new ArrayList<>();
+		ResultSet p = select("* from paises;");
+		try {
+			while (p.next()) {
+				Pais aux = new Pais(p.getInt("codigo_pais"), p.getString("nombre"), p.getString("abreviacion"));
+				paises.add(aux);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return paises;
+	}
+	
+	public int generateNextCode(String entity) {
+		ResultSet rs = select("codigo_" + entity + " from " + entity + "s;");
+		int aux = -1;
+		try {
+			while(rs.next()) {
+				if (rs.getInt("codigo_"+entity) > aux) {
+					aux = rs.getInt("codigo_"+entity);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return aux+1;
+	}
+
+	public void registerUser(Integer codigoPersona, Integer codigoUsuario, String username, String password, String pnombre,
+			String papellido, Integer idPais, String fecha_nacim, String correo, Integer cedula, String sexo) {
+		
+		insert("personas",
+				"codigo_persona,pnombre,papellido,fechanacim,sexo,pais_origen,cedula",
+				codigoPersona.toString() + ","
+						+ "'" + pnombre + "',"
+						+ "'" + papellido + "',"
+						+ "'" + fecha_nacim + "',"
+						+ "'" + sexo + "',"
+						+ idPais.toString() + ","
+						+ (cedula != null ? cedula : "NULL"));
+		
+		insert("usuarios", "codigo_usuario,persona,password,fecharegistro,correo,estado,nombre_usuario", 
+				codigoUsuario.toString() + ","
+				+ codigoPersona.toString() + ","
+				+ "'" + password + "',now(),"
+				+ (correo != null ? "'" + correo + "'" : "NULL")
+				+ ",'Activo','"
+				+ username + "'");
+		System.out.println("Usuario agregado correctamente.");
 	}
 
 }

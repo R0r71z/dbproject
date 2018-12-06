@@ -9,6 +9,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
+
+import logico.DB;
+import logico.Usuario;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -21,11 +25,13 @@ import java.awt.Font;
 import javax.swing.SwingConstants;
 import java.awt.Color;
 import javax.swing.JButton;
+import javax.swing.Icon;
 
 public class Principal extends JFrame {
 	private Dimension dim;
-	private JTextField username;
-	private JTextField password;
+	private JTextField usernameField;
+	private JTextField passwordField;
+	private DB db = new DB();
 
 	/**
 	 * Launch the application.
@@ -53,53 +59,22 @@ public class Principal extends JFrame {
 		setBounds(100, 100, 620, 540);
 		setLocationRelativeTo(null);
 		
-		JMenuBar menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
-		
-		JMenu mnRegistrar = new JMenu("Registrar");
-		menuBar.add(mnRegistrar);
-		
-		JMenuItem mntmUsuario = new JMenuItem("Usuario");
-		mntmUsuario.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		mnRegistrar.add(mntmUsuario);
-		
-		JMenuItem mntmNewMenuItem = new JMenuItem("Artista");
-		mntmNewMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RegistrarAutor autor = new RegistrarAutor();
-				autor.setVisible(true);
-			}
-		});
-		mnRegistrar.add(mntmNewMenuItem);
-		
-		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Canci\u00F3n");
-		mnRegistrar.add(mntmNewMenuItem_1);
-		
-		JMenuItem mntmNewMenuItem_2 = new JMenuItem("Album");
-		mnRegistrar.add(mntmNewMenuItem_2);
-		
-		JMenu mnNewMenu = new JMenu("Listar");
-		menuBar.add(mnNewMenu);
-		
-		JMenuItem mntmNewMenuItem_3 = new JMenuItem("Canci\u00F3n");
-		mnNewMenu.add(mntmNewMenuItem_3);
-		
-		JMenuItem mntmAlbum = new JMenuItem("Album");
-		mnNewMenu.add(mntmAlbum);
-		
-		JMenuItem mntmArtista = new JMenuItem("Artista");
-		mnNewMenu.add(mntmArtista);
-		
-		JMenu mnReproducir = new JMenu("Reproducir");
-		menuBar.add(mnReproducir);
-		
 		
 		URL url = Principal.class.getResource("/images/bg.gif");
 		ImageIcon imageIcon = new ImageIcon(url);
 		getContentPane().setLayout(null);
+		
+		JPanel homePanel = new JPanel();
+		homePanel.setLayout(null);
+		homePanel.setBounds(0, 0, 600, 480);
+		getContentPane().add(homePanel);
+		
+		JLabel welcomeLbl = new JLabel("Bienvenido");
+		welcomeLbl.setHorizontalAlignment(SwingConstants.CENTER);
+		welcomeLbl.setForeground(Color.WHITE);
+		welcomeLbl.setFont(new Font("SimSun", Font.BOLD, 29));
+		welcomeLbl.setBounds(0, 0, 238, 34);
+		homePanel.add(welcomeLbl);
 		
 		JPanel loginPanel = new JPanel();
 		loginPanel.setBounds(0, 0, 600, 480);
@@ -127,15 +102,15 @@ public class Principal extends JFrame {
 		lblContrasea.setForeground(Color.WHITE);
 		lblContrasea.setFont(new Font("Open Sans", Font.BOLD, 19));
 		
-		username = new JTextField();
-		username.setBounds(341, 226, 199, 43);
-		loginPanel.add(username);
-		username.setColumns(10);
+		usernameField = new JTextField();
+		usernameField.setBounds(340, 110, 199, 43);
+		loginPanel.add(usernameField);
+		usernameField.setColumns(10);
 		
-		password = new JPasswordField();
-		password.setBounds(341, 121, 199, 43);
-		loginPanel.add(password);
-		password.setColumns(10);
+		passwordField = new JPasswordField();
+		passwordField.setBounds(340, 215, 199, 43);
+		loginPanel.add(passwordField);
+		passwordField.setColumns(10);
 		
 		JButton btnEntrar = new JButton("Entrar");
 		btnEntrar.setBounds(200, 334, 199, 43);
@@ -152,14 +127,20 @@ public class Principal extends JFrame {
 		loginPanel.add(bg);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				RegistrarUsuario usuario = new RegistrarUsuario();
+				RegistrarUsuario usuario = new RegistrarUsuario(db);
 				usuario.setVisible(true);
 			}
 		});
 		btnEntrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// if login is correct
-				loginPanel.setVisible(false);
+				String username = usernameField.getText();
+				String password = String.valueOf(((JPasswordField) passwordField).getPassword());
+				Usuario user = db.getDBUser(username);
+				if (user != null && password != null) {
+					if (user.getPassword().equalsIgnoreCase(password)) {
+						loginPanel.setVisible(false);
+					}	
+				}
 			}
 		});
 	}

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -11,6 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Window.Type;
 import javax.swing.border.TitledBorder;
+
+import logico.DB;
+import logico.Pais;
+
 import javax.swing.UIManager;
 import java.awt.Color;
 import javax.swing.JLabel;
@@ -20,8 +26,10 @@ import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
 import javax.swing.JPasswordField;
+import javax.swing.DefaultComboBoxModel;
 
 public class RegistrarUsuario extends JDialog {
 
@@ -29,27 +37,11 @@ public class RegistrarUsuario extends JDialog {
 	private JTextField txtCedula;
 	private JTextField txtNombre;
 	private JTextField txtApellido;
-	private JTextField textField;
-	private JTextField textField_2;
+	private JTextField txtUsername;
+	private JTextField txtCorreo;
 	private JPasswordField passwordField;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			RegistrarUsuario dialog = new RegistrarUsuario();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Create the dialog.
-	 */
-	public RegistrarUsuario() {
+	public RegistrarUsuario(DB db) {
 		setTitle("Registrar Usuario");
 		setType(Type.UTILITY);
 		setResizable(false);
@@ -98,17 +90,14 @@ public class RegistrarUsuario extends JDialog {
 		lblNewLabel_1.setBounds(10, 120, 46, 14);
 		panel.add(lblNewLabel_1);
 		
-		JComboBox cbxPais = new JComboBox();
+		ArrayList<Pais> paises = db.getPaises();
+		JComboBox cbxPais = new JComboBox(paises.toArray());
 		cbxPais.setBounds(66, 120, 102, 23);
 		panel.add(cbxPais);
 		
 		JLabel lblNewLabel_2 = new JLabel("Sexo:");
 		lblNewLabel_2.setBounds(197, 120, 46, 14);
 		panel.add(lblNewLabel_2);
-		
-		JRadioButton rdbtnNewRadioButton = new JRadioButton("Masculino");
-		rdbtnNewRadioButton.setBounds(271, 120, 97, 23);
-		panel.add(rdbtnNewRadioButton);
 		
 		JLabel lblNacimiento = new JLabel("Fecha N:");
 		lblNacimiento.setBounds(10, 165, 64, 14);
@@ -119,22 +108,14 @@ public class RegistrarUsuario extends JDialog {
 		spinner.setBounds(66, 162, 102, 23);
 		panel.add(spinner);
 		
-		JLabel lblIdioma = new JLabel("Idioma:");
-		lblIdioma.setBounds(197, 165, 46, 14);
-		panel.add(lblIdioma);
-		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(271, 162, 170, 23);
-		panel.add(comboBox);
-		
-		JLabel lblUsername = new JLabel("ID:");
-		lblUsername.setBounds(10, 210, 46, 14);
+		JLabel lblUsername = new JLabel("Usuario:");
+		lblUsername.setBounds(197, 165, 72, 14);
 		panel.add(lblUsername);
 		
-		textField = new JTextField();
-		textField.setBounds(66, 210, 102, 23);
-		panel.add(textField);
-		textField.setColumns(10);
+		txtUsername = new JTextField();
+		txtUsername.setBounds(271, 161, 170, 23);
+		panel.add(txtUsername);
+		txtUsername.setColumns(10);
 		
 		JLabel lblNewLabel_3 = new JLabel("Contrase\u00F1a:");
 		lblNewLabel_3.setBounds(197, 210, 83, 14);
@@ -144,20 +125,57 @@ public class RegistrarUsuario extends JDialog {
 		lblNewLabel_4.setBounds(10, 255, 46, 14);
 		panel.add(lblNewLabel_4);
 		
-		textField_2 = new JTextField();
-		textField_2.setBounds(66, 252, 375, 23);
-		panel.add(textField_2);
-		textField_2.setColumns(10);
+		txtCorreo = new JTextField();
+		txtCorreo.setBounds(66, 252, 375, 23);
+		panel.add(txtCorreo);
+		txtCorreo.setColumns(10);
 		
 		passwordField = new JPasswordField();
 		passwordField.setBounds(271, 210, 170, 20);
 		panel.add(passwordField);
+		
+		JComboBox cbxSex = new JComboBox();
+		cbxSex.setModel(new DefaultComboBoxModel(new String[] {"M", "F"}));
+		cbxSex.setBounds(271, 120, 53, 20);
+		panel.add(cbxSex);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("Registrar");
+				okButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						Integer cedula = null;
+						try {
+							cedula = Integer.valueOf(txtCedula.getText());
+						} catch(NumberFormatException er) {
+							txtCedula.setText("");
+						}
+						
+						
+						String pnombre = txtNombre.getText();
+						String papellido = txtApellido.getText();
+						int idPais = paises.get(cbxPais.getSelectedIndex()).getCodigo_pais();
+						String username = txtUsername.getText();
+						String password = String.valueOf(passwordField.getPassword());
+						String correo = txtCorreo.getText();
+						Date fecha_nacim = (Date) spinner.getValue();
+						Integer codigoPersona = db.generateNextCode("persona");
+						Integer codigoUsuario = db.generateNextCode("usuario");
+						String sexo = cbxSex.getSelectedItem().toString();
+						
+						Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+						String fecha_nac = formatter.format(fecha_nacim);
+						
+						if (codigoPersona != null && pnombre.length() > 0 && papellido.length() > 0 && fecha_nacim != null
+							&& codigoUsuario != null && username.length() > 0 && password.length() > 0) {
+							db.registerUser(codigoPersona, codigoUsuario, username, password, pnombre, papellido, idPais, fecha_nac, correo, cedula, sexo);
+							dispose();
+						}
+
+					}
+				});
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
